@@ -1,48 +1,50 @@
-name: job-template
-description: Template for SGNL JavaScript jobs - replace with your job description
+name: hashicorp-boundary-cancel-sessions
+description: Cancel active sessions in HashiCorp Boundary
 
 # Input parameters for web form generation
 inputs:
-  target:
+  sessionId:
     type: text
-    description: Target resource identifier (e.g., user email, group ID)
+    description: The Boundary session ID to cancel
     required: true
     validation:
       min: 1
-      max: 100
+      max: 200
 
-  action:
+  authMethodId:
     type: text
-    description: Action to perform on the target resource
+    description: The Boundary auth method ID for authentication
     required: true
     validation:
       min: 1
-      max: 50
-
-  options:
-    type: array
-    description: Additional options for the operation
-    required: false
-    item_type: text
-    validation:
-      max: 10
-
-  dry_run:
-    type: boolean
-    description: Preview changes without executing them
-    required: false
-    default: false
+      max: 200
 
 # Expected output structure
 outputs:
-  status:
+  sessionId:
     type: text
-    description: Operation result (success, failed, recovered, etc.)
+    description: The session ID that was processed
 
-  target:
+  authMethodId:
     type: text
-    description: The target resource that was processed
+    description: The auth method ID used for authentication
 
-  processed_at:
+  sessionCancelled:
+    type: boolean
+    description: Whether the session was successfully cancelled
+
+  cancelledAt:
     type: datetime
-    description: When the operation completed (ISO 8601)
+    description: When the cancellation completed (ISO 8601)
+
+# Required secrets (configured at deployment time)
+secrets:
+  - BOUNDARY_USERNAME
+  - BOUNDARY_PASSWORD
+  - BOUNDARY_BASE_URL
+
+# Runtime configuration
+runtime:
+  type: nodejs-22
+  timeout: 30s
+  memory: 128Mi
