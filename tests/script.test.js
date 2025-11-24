@@ -5,10 +5,12 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
     env: {
       ENVIRONMENT: 'test'
     },
+    environment: {
+      BOUNDARY_ADDRESS: 'https://boundary.example.com'
+    },
     secrets: {
-      BOUNDARY_USERNAME: 'testuser',
-      BOUNDARY_PASSWORD: 'testpass',
-      BOUNDARY_BASE_URL: 'https://boundary.example.com'
+      BASIC_USERNAME: 'testuser',
+      BASIC_PASSWORD: 'testpass'
     },
     outputs: {}
   };
@@ -38,7 +40,7 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
         .rejects.toThrow('Invalid or missing authMethodId parameter');
     });
 
-    test('should throw error for missing BOUNDARY_USERNAME', async () => {
+    test('should throw error for missing BASIC_USERNAME', async () => {
       const params = {
         sessionId: 's_1234567890',
         authMethodId: 'ampw_1234567890'
@@ -47,16 +49,15 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
       const contextWithoutUsername = {
         ...mockContext,
         secrets: {
-          BOUNDARY_PASSWORD: 'testpass',
-          BOUNDARY_BASE_URL: 'https://boundary.example.com'
+          BASIC_PASSWORD: 'testpass'
         }
       };
 
       await expect(script.invoke(params, contextWithoutUsername))
-        .rejects.toThrow('Missing required secrets: BOUNDARY_USERNAME and BOUNDARY_PASSWORD');
+        .rejects.toThrow('Missing required secrets: BASIC_USERNAME and BASIC_PASSWORD');
     });
 
-    test('should throw error for missing BOUNDARY_PASSWORD', async () => {
+    test('should throw error for missing BASIC_PASSWORD', async () => {
       const params = {
         sessionId: 's_1234567890',
         authMethodId: 'ampw_1234567890'
@@ -65,16 +66,15 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
       const contextWithoutPassword = {
         ...mockContext,
         secrets: {
-          BOUNDARY_USERNAME: 'testuser',
-          BOUNDARY_BASE_URL: 'https://boundary.example.com'
+          BASIC_USERNAME: 'testuser'
         }
       };
 
       await expect(script.invoke(params, contextWithoutPassword))
-        .rejects.toThrow('Missing required secrets: BOUNDARY_USERNAME and BOUNDARY_PASSWORD');
+        .rejects.toThrow('Missing required secrets: BASIC_USERNAME and BASIC_PASSWORD');
     });
 
-    test('should throw error for missing BOUNDARY_BASE_URL', async () => {
+    test('should throw error for missing BOUNDARY_ADDRESS', async () => {
       const params = {
         sessionId: 's_1234567890',
         authMethodId: 'ampw_1234567890'
@@ -82,14 +82,15 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
 
       const contextWithoutBaseUrl = {
         ...mockContext,
+        environment: {},
         secrets: {
-          BOUNDARY_USERNAME: 'testuser',
-          BOUNDARY_PASSWORD: 'testpass'
+          BASIC_USERNAME: 'testuser',
+          BASIC_PASSWORD: 'testpass'
         }
       };
 
       await expect(script.invoke(params, contextWithoutBaseUrl))
-        .rejects.toThrow('Missing required secret: BOUNDARY_BASE_URL');
+        .rejects.toThrow('Missing required environment variable: BOUNDARY_ADDRESS');
     });
 
     test('should validate empty sessionId', async () => {
