@@ -90,7 +90,7 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
       };
 
       await expect(script.invoke(params, contextWithoutBaseUrl))
-        .rejects.toThrow('Missing required environment variable: BOUNDARY_ADDRESS');
+        .rejects.toThrow('No URL specified. Provide address parameter or ADDRESS environment variable');
     });
 
     test('should validate empty sessionId', async () => {

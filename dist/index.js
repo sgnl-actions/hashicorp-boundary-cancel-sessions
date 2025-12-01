@@ -1,6 +1,33 @@
 // SGNL Job Script - Auto-generated bundle
 'use strict';
 
+/**
+ * SGNL Actions - Authentication Utilities
+ *
+ * Shared authentication utilities for SGNL actions.
+ * Supports: Bearer Token, Basic Auth, OAuth2 Client Credentials, OAuth2 Authorization Code
+ */
+
+
+/**
+ * Get the base URL/address for API calls
+ * @param {Object} params - Request parameters
+ * @param {string} [params.address] - Address from params
+ * @param {Object} context - Execution context
+ * @returns {string} Base URL
+ */
+function getBaseUrl(params, context) {
+  const env = context.environment || {};
+  const address = params?.address || env.ADDRESS;
+
+  if (!address) {
+    throw new Error('No URL specified. Provide address parameter or ADDRESS environment variable');
+  }
+
+  // Remove trailing slash if present
+  return address.endsWith('/') ? address.slice(0, -1) : address;
+}
+
 class RetryableError extends Error {
   constructor(message) {
     super(message);
@@ -14,12 +41,6 @@ class FatalError extends Error {
     this.retryable = false;
   }
 }
-
-/**
- * @param {string} context.secrets.BASIC_USERNAME - Username for HashiCorp Boundary authentication
- * @param {string} context.secrets.BASIC_PASSWORD - Password for HashiCorp Boundary authentication
- * @param {string} context.environment.BOUNDARY_ADDRESS - HashiCorp Boundary API base URL
- */
 
 function validateInputs(params) {
   if (!params.sessionId || typeof params.sessionId !== 'string' || params.sessionId.trim() === '') {
@@ -162,6 +183,19 @@ async function cancelSession(sessionId, version, token, baseUrl) {
 }
 
 var script = {
+  /**
+   * Main execution handler - cancels a HashiCorp Boundary session
+   * @param {Object} params - Job input parameters
+   * @param {string} params.sessionId - The Boundary session ID to cancel
+   * @param {string} params.authMethodId - The Boundary auth method ID for authentication
+   *
+   * @param {Object} context - Execution context with secrets and environment
+   * @param {string} context.secrets.BASIC_USERNAME - Username for HashiCorp Boundary authentication
+   * @param {string} context.secrets.BASIC_PASSWORD - Password for HashiCorp Boundary authentication
+   * @param {string} context.environment.ADDRESS - Default HashiCorp Boundary API base URL
+   *
+   * @returns {Object} Job results
+   */
   invoke: async (params, context) => {
     console.log('Starting HashiCorp Boundary Cancel Sessions action');
 
@@ -176,11 +210,8 @@ var script = {
         throw new FatalError('Missing required secrets: BASIC_USERNAME and BASIC_PASSWORD');
       }
 
-      if (!context.environment?.BOUNDARY_ADDRESS) {
-        throw new FatalError('Missing required environment variable: BOUNDARY_ADDRESS');
-      }
-
-      const baseUrl = context.environment.BOUNDARY_ADDRESS.replace(/\/$/, ''); // Remove trailing slash
+      // Get base URL using utility function
+      const baseUrl = getBaseUrl(params, context);
 
       // Step 1: Authenticate to get a token
       console.log(`Authenticating with auth method: ${authMethodId}`);
@@ -226,6 +257,14 @@ var script = {
     }
   },
 
+  /**
+   * Error recovery handler - framework handles retries by default
+   *
+   * @param {Object} params - Original params plus error information
+   * @param {Object} context - Execution context
+   *
+   * @returns {Object} Recovery results
+   */
   error: async (params, _context) => {
     const { error } = params;
     console.error(`Error handler invoked: ${error?.message}`);
@@ -234,6 +273,14 @@ var script = {
     throw error;
   },
 
+  /**
+   * Graceful shutdown handler - cleanup when job is halted
+   *
+   * @param {Object} params - Original params plus halt reason
+   * @param {Object} context - Execution context
+   *
+   * @returns {Object} Cleanup results
+   */
   halt: async (params, _context) => {
     const { reason, sessionId, authMethodId } = params;
     console.log(`Job is being halted (${reason})`);
