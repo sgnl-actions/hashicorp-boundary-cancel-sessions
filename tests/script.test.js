@@ -2,11 +2,8 @@ import script from '../src/script.mjs';
 
 describe('HashiCorp Boundary Cancel Sessions Script', () => {
   const mockContext = {
-    env: {
-      ENVIRONMENT: 'test'
-    },
     environment: {
-      BOUNDARY_ADDRESS: 'https://boundary.example.com'
+      ADDRESS: 'https://boundary.example.com'
     },
     secrets: {
       BASIC_USERNAME: 'testuser',
@@ -74,7 +71,7 @@ describe('HashiCorp Boundary Cancel Sessions Script', () => {
         .rejects.toThrow('Missing required secrets: BASIC_USERNAME and BASIC_PASSWORD');
     });
 
-    test('should throw error for missing BOUNDARY_ADDRESS', async () => {
+    test('should throw error for missing ADDRESS', async () => {
       const params = {
         sessionId: 's_1234567890',
         authMethodId: 'ampw_1234567890'
