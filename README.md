@@ -63,8 +63,7 @@ This SGNL action integrates with HashiCorp Boundary to cancel active sessions. W
     "authMethodId": "ampw_1234567890"
   },
   "environment": {
-    "ADDRESS": "https://boundary.example.com",
-    "LOG_LEVEL": "info"
+    "ADDRESS": "https://boundary.example.com"
   }
 }
 ```
@@ -186,15 +185,6 @@ This action uses the following HashiCorp Boundary API endpoints:
 7. **Conflict Error (409)**
    - The session may already be cancelled
    - There may be a version mismatch - the action will handle retries automatically
-
-## Version History
-
-### v1.0.0
-- Initial release
-- Support for cancelling sessions via HashiCorp Boundary API
-- Basic authentication support
-- Integration with @sgnl-actions/utils package
-- Comprehensive error handling with retryable/fatal error types
 
 ## License
 
