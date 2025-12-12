@@ -1,4 +1,4 @@
-import { getBaseUrl } from '@sgnl-actions/utils';
+import { getBaseURL, resolveJSONPathTemplates} from '@sgnl-actions/utils';
 
 class RetryableError extends Error {
   constructor(message) {
@@ -171,10 +171,18 @@ export default {
   invoke: async (params, context) => {
     console.log('Starting HashiCorp Boundary Cancel Sessions action');
 
-    try {
-      validateInputs(params);
+    const jobContext = context.data || {};
 
-      const { sessionId, authMethodId } = params;
+    // Resolve JSONPath templates in params
+    const { result: resolvedParams, errors } = resolveJSONPathTemplates(params, jobContext);
+    if (errors.length > 0) {
+     console.warn('Template resolution errors:', errors);
+    }
+
+    try {
+      validateInputs(resolvedParams);
+
+      const { sessionId, authMethodId } = resolvedParams;
 
       console.log(`Processing session ID: ${sessionId}`);
 
@@ -183,7 +191,7 @@ export default {
       }
 
       // Get base URL using utility function
-      const baseUrl = getBaseUrl(params, context);
+      const baseUrl = getBaseURL(resolvedParams, context);
 
       // Step 1: Authenticate to get a token
       console.log(`Authenticating with auth method: ${authMethodId}`);
