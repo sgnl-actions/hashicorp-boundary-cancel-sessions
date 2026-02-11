@@ -8,6 +8,10 @@
  * Supports: Bearer Token, Basic Auth, OAuth2 Client Credentials, OAuth2 Authorization Code
  */
 
+/**
+ * User-Agent header value for all SGNL CAEP Hub requests.
+ */
+const SGNL_USER_AGENT = 'SGNL-CAEP-Hub/2.0';
 
 /**
  * Get the base URL/address for API calls
@@ -58,7 +62,8 @@ async function authenticate(authMethodId, username, password, baseUrl) {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'User-Agent': SGNL_USER_AGENT
     },
     body: JSON.stringify({
       attributes: {
@@ -102,7 +107,8 @@ async function getSession(sessionId, token, baseUrl) {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'User-Agent': SGNL_USER_AGENT
     }
   });
 
@@ -144,7 +150,8 @@ async function cancelSession(sessionId, version, token, baseUrl) {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'User-Agent': SGNL_USER_AGENT
     },
     body: JSON.stringify({
       id: sessionId,
